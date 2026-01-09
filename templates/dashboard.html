@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Lista de Pacientes</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Nacimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for paciente in pacientes %}
+                            <tr>
+                                <td>{{ paciente[0] }}</td>
+                                <td>{{ paciente[1] }} {{ paciente[2] }}</td>
+                                <td>{{ paciente[3] }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="3" class="text-center">No hay pacientes registrados.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Agenda de Citas</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Paciente</th>
+                                <th>Médico</th>
+                                <th>Motivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cita in citas %}
+                            <tr>
+                                <td>{{ cita[0] }}</td>
+                                <td>{{ cita[1] }}</td>
+                                <td>{{ cita[2] }}</td>
+                                <td>{{ cita[3] }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-center">No hay citas próximas.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
