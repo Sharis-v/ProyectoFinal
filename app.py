@@ -17,7 +17,7 @@ def get_db_connection():
 # ==============================================================================
 # RUTA DE INICIO Y LOGIN
 # ==============================================================================
-@app.route('/')
+@app.route('/',methods=['GET', 'POST'])
 def index():
     # Si ya inició sesión, lo mandamos a su portal correspondiente
     if 'rol' in session:
