@@ -303,5 +303,65 @@ def agendar_cita():
     
     return redirect(url_for('index'))
 
+# ==============================================================================
+# PORTAL 4: CUBO DE DATOS / REPORTES BI
+# ==============================================================================
+@app.route('/cubo')
+def cubo():
+    # Verificamos que el usuario esté logueado
+    if 'rol' not in session:
+        return redirect(url_for('index'))
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # --- 1. KPI: Total Ingresos ---
+    # Si no tienes la tabla Fact_Citas, intenta sumar de CITA (estimado)
+    try:
+        cur.execute("SELECT SUM(ingreso_estimado) FROM Fact_Citas")
+        total_ingresos = cur.fetchone()[0] or 0
+    except:
+        # Fallback si no existe el cubo: Valor dummy o 0
+        conn.rollback()
+        total_ingresos = 0
+
+    # --- 2. KPI: Total Citas ---
+    cur.execute("SELECT COUNT(*) FROM CITA")
+    total_citas = cur.fetchone()[0]
+
+    # --- 3. Gráfico: Citas por Mes (Ejemplo usando fecha de CITA) ---
+    cur.execute("""
+        SELECT TO_CHAR(fecha_hora, 'Month'), COUNT(*) 
+        FROM CITA 
+        GROUP BY TO_CHAR(fecha_hora, 'Month')
+    """)
+    datos_meses = cur.fetchall()
+    # Separamos en dos listas para Chart.js
+    etiquetas_meses = [fila[0].strip() for fila in datos_meses] if datos_meses else []
+    valores_meses = [fila[1] for fila in datos_meses] if datos_meses else []
+
+    # --- 4. Gráfico: Citas por Especialidad ---
+    cur.execute("""
+        SELECT M.especialidad, COUNT(C.id_cita)
+        FROM CITA C
+        JOIN MEDICO M ON C.id_medico = M.id_medico
+        GROUP BY M.especialidad
+    """)
+    datos_esp = cur.fetchall()
+    etiquetas_esp = [fila[0] for fila in datos_esp] if datos_esp else []
+    valores_esp = [fila[1] for fila in datos_esp] if datos_esp else []
+
+    cur.close()
+    conn.close()
+
+    # Renderizamos la plantilla pasando todos los datos
+    return render_template('cubo.html', 
+        ingresos=[total_ingresos], # Pasamos como lista para sum en jinja
+        conteo_citas=[total_citas],
+        meses=etiquetas_meses,
+        ingresos_por_mes=valores_meses, # Reutilizamos variable para el ejemplo
+        especialidades=etiquetas_esp,
+        citas_por_esp=valores_esp)
+
 if __name__ == '__main__':
     app.run(debug=True)

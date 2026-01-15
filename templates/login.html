@@ -4,7 +4,7 @@
 <style>
     /* Fondo de Pantalla Completa con Imagen Local y Filtro Azul */
     body {
-        /* Asegúrate de que 'fondo.jpg' existe en la carpeta static/img/ */
+        /* Asegúrate de tener la imagen 'fondo.jpg' en static/img/ */
         background: linear-gradient(rgba(0, 70, 140, 0.7), rgba(0, 70, 140, 0.7)),
                     url("{{ url_for('static', filename='img/fondo.jpg') }}");
         background-size: cover;
@@ -24,7 +24,7 @@
     /* La Tarjeta de Login */
     .login-card {
         background: rgba(255, 255, 255, 0.95); /* Blanco casi sólido */
-        backdrop-filter: blur(10px); /* Efecto vidrio */
+        backdrop-filter: blur(10px); /* Efecto vidrio borroso detrás */
         padding: 2.5rem;
         border-radius: 20px;
         box-shadow: 0 15px 35px rgba(0,0,0,0.3);
@@ -39,7 +39,7 @@
 
     /* Inputs estilizados */
     .form-control {
-        border-radius: 50px;
+        border-radius: 50px; /* Bordes redondos */
         padding: 12px 20px;
         background-color: #f1f3f5;
         border: 1px solid transparent;
@@ -102,7 +102,7 @@
             {% endif %}
         {% endwith %}
 
-        <form action="{{ url_for('login_post') }}" method="POST">
+        <form action="{{ url_for('login') }}" method="POST">
             <div class="form-group">
                 <input type="text" name="username" class="form-control" placeholder="👤 Usuario" required autofocus>
             </div>
