@@ -8,8 +8,7 @@
 **Docente:** GABRIEL HURTADO AVILÉS  
 **Semestre/Grupo:** 3CV5  
 **Equipo:**
-👤 [Tu Nombre Completo Aquí]  
-👤 [Nombre de tu Compañero Aquí]
+👤 Montiel Valdivia Fernanda Sharis 
 
 ---
 
