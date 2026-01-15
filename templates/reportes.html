@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">📊 Reportes de Inteligencia de Negocios</h2>
+    <hr>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">Citas por Especialidad</div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead><tr><th>Especialidad</th><th>Total Citas</th></tr></thead>
+                        <tbody>
+                            {% for dato in datos_esp %}
+                            <tr>
+                                <td>{{ dato[0] }}</td>
+                                <td>{{ dato[1] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">Ingresos Estimados por Mes</div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead><tr><th>Mes</th><th>Dinero ($)</th></tr></thead>
+                        <tbody>
+                            {% for dato in datos_ing %}
+                            <tr>
+                                <td>Mes {{ dato[0] }}</td>
+                                <td>${{ dato[1] }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
