@@ -2,47 +2,72 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="text-center">📊 Reportes de Inteligencia de Negocios</h2>
-    <hr>
-
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">Citas por Especialidad</div>
+    <h1 class="text-center mb-4">🧊 Cubo de Análisis Clínico</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-header">Total Ingresos</div>
                 <div class="card-body">
-                    <table class="table">
-                        <thead><tr><th>Especialidad</th><th>Total Citas</th></tr></thead>
-                        <tbody>
-                            {% for dato in datos_esp %}
-                            <tr>
-                                <td>{{ dato[0] }}</td>
-                                <td>{{ dato[1] }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <h5 class="card-title">${{ ingresos | sum }}</h5>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-success text-white">Ingresos Estimados por Mes</div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-header">Total Citas</div>
                 <div class="card-body">
-                    <table class="table">
-                        <thead><tr><th>Mes</th><th>Dinero ($)</th></tr></thead>
-                        <tbody>
-                            {% for dato in datos_ing %}
-                            <tr>
-                                <td>Mes {{ dato[0] }}</td>
-                                <td>${{ dato[1] }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <h5 class="card-title">{{ conteo_citas | sum }}</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header">📈 Tendencia de Ingresos Mensuales</div>
+                <div class="card-body">
+                    <canvas id="chartIngresos"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-header">🍰 Citas por Especialidad</div>
+                <div class="card-body">
+                    <canvas id="chartEspecialidad"></canvas>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Gráfico de Barras (Ingresos)
+    new Chart(document.getElementById('chartIngresos'), {
+        type: 'bar',
+        data: {
+            labels: {{ meses | tojson }},
+            datasets: [{
+                label: 'Ingresos ($)',
+                data: {{ ingresos | tojson }},
+                backgroundColor: 'rgba(54, 162, 235, 0.6)'
+            }]
+        }
+    });
+
+    // Gráfico de Pastel (Especialidades)
+    new Chart(document.getElementById('chartEspecialidad'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ especialidades | tojson }},
+            datasets: [{
+                data: {{ conteo_citas | tojson }},
+                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
+            }]
+        }
+    });
+</script>
 {% endblock %}
