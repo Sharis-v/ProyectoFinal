@@ -1,106 +1,99 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Panel Administrativo</title>
-    <style>
-        body { font-family: sans-serif; margin: 0; padding: 20px; background-color: #f4f4f9; }
-        .header { display: flex; justify-content: space-between; align-items: center; background: #2c3e50; color: white; padding: 15px; border-radius: 8px; }
-        .btn-logout { background: #e74c3c; color: white; text-decoration: none; padding: 8px 15px; border-radius: 5px; }
-        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .full-width { grid-column: span 2; }
-        h3 { border-bottom: 2px solid #eee; padding-bottom: 10px; color: #2c3e50; }
-        
-        /* Formularios */
-        input, select { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #27ae60; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; cursor: pointer; margin-top: 10px; }
-        button:hover { background: #219150; }
+{% extends 'base.html' %}
 
-        /* Tablas */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #34495e; color: white; }
-        tr:nth-child(even) { background-color: #f2f2f2; }
+{% block content %}
+<style>
+    /* Tus estilos originales preservados */
+    .admin-header { display: flex; justify-content: space-between; align-items: center; background: #2c3e50; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+    
+    /* Cambié nombre a admin-grid para no chocar con Bootstrap */
+    .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    
+    .card-custom { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .full-width { grid-column: span 2; }
+    
+    h3 { border-bottom: 2px solid #eee; padding-bottom: 10px; color: #2c3e50; }
+    
+    /* Formularios */
+    input, select { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    
+    .btn-save { background: #27ae60; color: white; border: none; padding: 10px; width: 100%; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+    .btn-save:hover { background: #219150; }
 
-        /* Alertas */
-        .alert { padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center; color: white; }
-        .success { background-color: #27ae60; } .error { background-color: #c0392b; }
-    </style>
-</head>
-<body>
+    /* Tablas */
+    .custom-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .custom-table th, .custom-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    .custom-table th { background-color: #34495e; color: white; }
+    .custom-table tr:nth-child(even) { background-color: #f2f2f2; }
+</style>
 
-    <div class="header">
-        <h1>🛠️ Panel de Administrador</h1>
-        <a href="/logout" class="btn-logout">Cerrar Sesión</a>
+<div class="admin-header">
+    <h1 style="margin:0; font-size: 24px;">🛠️ Panel de Administrador</h1>
+</div>
+
+<div class="mb-4">
+    <a href="{{ url_for('cubo') }}" class="btn btn-warning w-100 py-3 fw-bold shadow-sm" style="font-size: 1.2rem; text-transform: uppercase;">
+        📊 Ir a Reportes de Inteligencia de Negocios (Cubo OLAP)
+    </a>
+</div>
+
+<div class="admin-grid">
+    
+    <div class="card-custom">
+        <h3>👨‍⚕️ Registrar Nuevo Médico</h3>
+        <form action="/guardar_medico" method="POST">
+            <input type="text" name="nombre" placeholder="Nombre(s)" required>
+            <input type="text" name="paterno" placeholder="Apellido Paterno" required>
+            <input type="text" name="materno" placeholder="Apellido Materno">
+            <input type="text" name="especialidad" placeholder="Especialidad (ej. Cardiología)" required>
+            <hr>
+            <p>Datos de Acceso:</p>
+            <input type="text" name="usuario_login" placeholder="Usuario para Login" required>
+            <input type="password" name="password_login" placeholder="Contraseña" required>
+            <button type="submit" class="btn-save">Guardar Médico</button>
+        </form>
     </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert {{ category }}" style="margin-top: 20px;">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <div class="container">
-        <div class="card">
-            <h3>👨‍⚕️ Registrar Nuevo Médico</h3>
-            <form action="/guardar_medico" method="POST">
-                <input type="text" name="nombre" placeholder="Nombre(s)" required>
-                <input type="text" name="paterno" placeholder="Apellido Paterno" required>
-                <input type="text" name="materno" placeholder="Apellido Materno">
-                <input type="text" name="especialidad" placeholder="Especialidad (ej. Cardiología)" required>
-                <hr>
-                <p>Datos de Acceso:</p>
-                <input type="text" name="usuario_login" placeholder="Usuario para Login" required>
-                <input type="password" name="password_login" placeholder="Contraseña" required>
-                <button type="submit">Guardar Médico</button>
-            </form>
-        </div>
-
-        <div class="card">
-            <h3>👤 Registrar Nuevo Paciente</h3>
-            <form action="/guardar_paciente" method="POST">
-                <input type="text" name="nombre" placeholder="Nombre(s)" required>
-                <input type="text" name="paterno" placeholder="Apellido Paterno" required>
-                <input type="text" name="materno" placeholder="Apellido Materno">
-                <label>Fecha de Nacimiento:</label>
-                <input type="date" name="nacimiento" required>
-                <hr>
-                <p>Datos de Acceso:</p>
-                <input type="text" name="usuario_login" placeholder="Usuario para Login" required>
-                <input type="password" name="password_login" placeholder="Contraseña" required>
-                <button type="submit">Guardar Paciente</button>
-            </form>
-        </div>
-
-        <div class="card full-width">
-            <h3>📅 Reporte Global de Citas</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha y Hora</th>
-                        <th>Médico</th>
-                        <th>Paciente</th>
-                        <th>Motivo</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for cita in citas %}
-                    <tr>
-                        <td>{{ cita[0] }}</td>
-                        <td>{{ cita[2] }}</td>
-                        <td>{{ cita[1] }}</td>
-                        <td>{{ cita[3] }}</td>
-                    </tr>
-                    {% else %}
-                    <tr><td colspan="4">No hay citas registradas.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <div class="card-custom">
+        <h3>👤 Registrar Nuevo Paciente</h3>
+        <form action="/guardar_paciente" method="POST">
+            <input type="text" name="nombre" placeholder="Nombre(s)" required>
+            <input type="text" name="paterno" placeholder="Apellido Paterno" required>
+            <input type="text" name="materno" placeholder="Apellido Materno">
+            <label>Fecha de Nacimiento:</label>
+            <input type="date" name="nacimiento" required>
+            <hr>
+            <p>Datos de Acceso:</p>
+            <input type="text" name="usuario_login" placeholder="Usuario para Login" required>
+            <input type="password" name="password_login" placeholder="Contraseña" required>
+            <button type="submit" class="btn-save">Guardar Paciente</button>
+        </form>
     </div>
 
-</body>
-</html>
+    <div class="card-custom full-width">
+        <h3>📅 Reporte Global de Citas</h3>
+        <table class="custom-table">
+            <thead>
+                <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Médico</th>
+                    <th>Paciente</th>
+                    <th>Motivo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cita in citas %}
+                <tr>
+                    <td>{{ cita[0] }}</td>
+                    <td>{{ cita[2] }}</td>
+                    <td>{{ cita[1] }}</td>
+                    <td>{{ cita[3] }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="4" style="text-align:center;">No hay citas registradas.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
