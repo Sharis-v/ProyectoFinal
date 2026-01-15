@@ -1,40 +1,130 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Acceso al Sistema Médico</title>
-    <style>
-        body { font-family: sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .login-card { background: white; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 350px; text-align: center; }
-        h2 { color: #333; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; }
-        button:hover { background-color: #0056b3; }
-        .alert { color: white; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
-        .error { background-color: #e74c3c; }
-        .info { background-color: #3498db; }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Fondo de Pantalla Completa con Imagen Local y Filtro Azul */
+    body {
+        /* Asegúrate de que 'fondo.jpg' existe en la carpeta static/img/ */
+        background: linear-gradient(rgba(0, 70, 140, 0.7), rgba(0, 70, 140, 0.7)),
+                    url("{{ url_for('static', filename='img/fondo.jpg') }}");
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+    }
+
+    /* Contenedor central */
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh; /* Centrado vertical */
+    }
+
+    /* La Tarjeta de Login */
+    .login-card {
+        background: rgba(255, 255, 255, 0.95); /* Blanco casi sólido */
+        backdrop-filter: blur(10px); /* Efecto vidrio */
+        padding: 2.5rem;
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        width: 100%;
+        max-width: 420px;
+        transition: transform 0.3s ease;
+    }
+
+    .login-card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Inputs estilizados */
+    .form-control {
+        border-radius: 50px;
+        padding: 12px 20px;
+        background-color: #f1f3f5;
+        border: 1px solid transparent;
+        margin-bottom: 15px;
+    }
+
+    .form-control:focus {
+        background-color: #fff;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+    }
+
+    /* Botón de Iniciar Sesión */
+    .btn-login {
+        border-radius: 50px;
+        padding: 12px;
+        font-weight: bold;
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+        background: linear-gradient(45deg, #0d6efd, #0043a8);
+        border: none;
+    }
+
+    .btn-login:hover {
+        background: linear-gradient(45deg, #0b5ed7, #003685);
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.4);
+    }
+
+    /* Emoji animado */
+    .hospital-icon {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 10px;
+        animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0px); }
+    }
+</style>
+
+<div class="login-container">
     <div class="login-card">
-        <h2>🏥 Consultorio Web</h2>
-        
+        <div class="text-center mb-4">
+            <span class="hospital-icon">🏥</span>
+            <h2 class="fw-bold text-primary">Consultorio Web</h2>
+            <p class="text-muted">Bienvenido al sistema de gestión</p>
+        </div>
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert {{ category }}">{{ message }}</div>
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'info' }} alert-dismissible fade show text-center rounded-pill" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <form action="/login" method="POST">
-            <input type="text" name="username" placeholder="Usuario" required>
-            <input type="password" name="password" placeholder="Contraseña" required>
-            <button type="submit">Iniciar Sesión</button>
+        <form action="{{ url_for('login_post') }}" method="POST">
+            <div class="form-group">
+                <input type="text" name="username" class="form-control" placeholder="👤 Usuario" required autofocus>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" class="form-control" placeholder="🔒 Contraseña" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 btn-login mt-2">
+                INGRESAR
+            </button>
         </form>
-        <p style="font-size: 12px; color: #666; margin-top: 15px;">
-            Pruebas: admin/admin123, drgabriel/medico123, fernanda/paciente123
-        </p>
+
+        <div class="mt-4 text-center border-top pt-3">
+            <p class="small text-muted mb-1">Credenciales de Acceso:</p>
+            <span class="badge bg-light text-dark border">admin / admin123</span>
+        </div>
+
+        <div class="mt-3 text-center">
+            <a href="{{ url_for('cubo') }}" class="btn btn-warning btn-sm fw-bold w-100 rounded-pill shadow-sm">
+                🧊 Ir Directo al Cubo de Datos
+            </a>
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
