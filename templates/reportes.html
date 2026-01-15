@@ -6,18 +6,22 @@
     
     <div class="row mb-4">
         <div class="col-md-4">
-            <div class="card text-white bg-primary mb-3">
+            <div class="card text-white bg-primary mb-3 shadow">
                 <div class="card-header">Total Ingresos</div>
                 <div class="card-body">
-                    <h5 class="card-title">${{ ingresos | sum }}</h5>
+                    <h5 class="card-title">
+                        ${{ (ingresos | sum) if ingresos else 0 }}
+                    </h5>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card text-white bg-success mb-3">
+            <div class="card text-white bg-success mb-3 shadow">
                 <div class="card-header">Total Citas</div>
                 <div class="card-body">
-                    <h5 class="card-title">{{ conteo_citas | sum }}</h5>
+                    <h5 class="card-title">
+                        {{ (conteo_citas | sum) if conteo_citas else 0 }}
+                    </h5>
                 </div>
             </div>
         </div>
@@ -25,18 +29,27 @@
 
     <div class="row">
         <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header">📈 Tendencia de Ingresos Mensuales</div>
+            <div class="card shadow mb-4">
+                <div class="card-header font-weight-bold text-primary">
+                    📈 Tendencia de Ingresos Mensuales
+                </div>
                 <div class="card-body">
-                    <canvas id="chartIngresos"></canvas>
+                    <div class="chart-container" style="position: relative; height:40vh; width:80vw">
+                        <canvas id="chartIngresos"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
+        
         <div class="col-md-4">
-            <div class="card shadow">
-                <div class="card-header">🍰 Citas por Especialidad</div>
+            <div class="card shadow mb-4">
+                <div class="card-header font-weight-bold text-primary">
+                    🍰 Citas por Especialidad
+                </div>
                 <div class="card-body">
-                    <canvas id="chartEspecialidad"></canvas>
+                    <div class="chart-container" style="position: relative; height:40vh; width:80vw">
+                        <canvas id="chartEspecialidad"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -44,29 +57,63 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Gráfico de Barras (Ingresos)
-    new Chart(document.getElementById('chartIngresos'), {
-        type: 'bar',
-        data: {
-            labels: {{ meses | tojson }},
-            datasets: [{
-                label: 'Ingresos ($)',
-                data: {{ ingresos | tojson }},
-                backgroundColor: 'rgba(54, 162, 235, 0.6)'
-            }]
-        }
-    });
 
-    // Gráfico de Pastel (Especialidades)
-    new Chart(document.getElementById('chartEspecialidad'), {
-        type: 'doughnut',
-        data: {
-            labels: {{ especialidades | tojson }},
-            datasets: [{
-                data: {{ conteo_citas | tojson }},
-                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0']
-            }]
+<script>
+    // Esperar a que el HTML cargue completamente antes de ejecutar JS
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        // --- 1. CONFIGURACIÓN DE DATOS ---
+        // Usamos | tojson | safe para que Python pase los datos limpios a JS
+        const datosMeses = {{ meses | tojson | safe }};
+        const datosIngresos = {{ ingresos | tojson | safe }};
+        const datosEspecialidades = {{ especialidades | tojson | safe }};
+        const datosConteo = {{ conteo_citas | tojson | safe }};
+
+        // --- 2. GRÁFICO DE BARRAS (INGRESOS) ---
+        const ctxIngresos = document.getElementById('chartIngresos');
+        if (ctxIngresos) {
+            new Chart(ctxIngresos, {
+                type: 'bar',
+                data: {
+                    labels: datosMeses,
+                    datasets: [{
+                        label: 'Ingresos Generados ($)',
+                        data: datosIngresos,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Se adapta al tamaño de la tarjeta
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+        // --- 3. GRÁFICO DE PASTEL (ESPECIALIDADES) ---
+        const ctxEsp = document.getElementById('chartEspecialidad');
+        if (ctxEsp) {
+            new Chart(ctxEsp, {
+                type: 'doughnut',
+                data: {
+                    labels: datosEspecialidades,
+                    datasets: [{
+                        data: datosConteo,
+                        backgroundColor: [
+                            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
         }
     });
 </script>
