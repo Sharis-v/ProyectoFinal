@@ -1,0 +1,12 @@
+<Project xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <PropertyGroup>
+    <Name>ConsultorioBI</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+  </PropertyGroup>
+  <Configurations>
+    <Configuration>
+      <Name>Development</Name>
+      <OutputPath>bin</OutputPath>
+    </Configuration>
+  </Configurations>
+</Project>

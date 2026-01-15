@@ -1,0 +1,37 @@
+/* ===========================================================
+   CONSULTAS MULTIDIMENSIONALES (MDX)
+   Cubo: Consultorio Médico
+   ===========================================================
+*/
+
+-- 1. ROLL-UP: Ingresos totales agrupados por Año
+SELECT 
+    { [Measures].[Ingreso Estimado] } ON COLUMNS,
+    { [Dim Tiempo].[Jerarquia Fecha].[Anio].MEMBERS } ON ROWS
+FROM [CuboConsultorio]
+
+-- 2. DRILL-DOWN: Detalle mensual de citas para el año 2025
+SELECT 
+    { [Measures].[Cantidad Citas] } ON COLUMNS,
+    { [Dim Tiempo].[Jerarquia Fecha].[Anio].[2025].CHILDREN } ON ROWS
+FROM [CuboConsultorio]
+
+-- 3. SLICE (CORTE): Rendimiento solo de 'Cardiología' en 2025
+SELECT 
+    { [Measures].[Ingreso Estimado], [Measures].[Cantidad Citas] } ON COLUMNS,
+    { [Dim Medico].[Nombre].MEMBERS } ON ROWS
+FROM [CuboConsultorio]
+WHERE ( 
+    [Dim Tiempo].[Anio].&[2025],
+    [Dim Medico].[Especialidad].&[Cardiología]
+)
+
+-- 4. TOP COUNT: Los 5 Médicos con más ingresos generados
+SELECT 
+    { [Measures].[Ingreso Estimado] } ON COLUMNS,
+    TOPCOUNT( 
+        [Dim Medico].[Nombre].MEMBERS, 
+        5, 
+        [Measures].[Ingreso Estimado] 
+    ) ON ROWS
+FROM [CuboConsultorio]
