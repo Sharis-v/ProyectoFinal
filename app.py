@@ -308,60 +308,67 @@ def agendar_cita():
 # ==============================================================================
 @app.route('/cubo')
 def cubo():
-    # Verificamos que el usuario esté logueado
-    if 'rol' not in session:
+    # 1. Seguridad: Si no hay usuario, va pa' fuera
+    if 'username' not in session:
         return redirect(url_for('index'))
 
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # --- 1. KPI: Total Ingresos ---
-    # Si no tienes la tabla Fact_Citas, intenta sumar de CITA (estimado)
+    # --- A) DATOS REALES DEL CONSULTORIO ---
+    cur.execute("SELECT COUNT(*) FROM PACIENTE")
+    num_pacientes = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM MEDICO")
+    num_medicos = cur.fetchone()[0]
+
+    cur.execute("SELECT COUNT(*) FROM CITA")
+    num_citas = cur.fetchone()[0]
+
+    # --- B) CÁLCULO DE INGRESOS (El Truco) ---
+    # Intentamos leer la tabla BI. Si falla, calculamos: Citas * $500
     try:
         cur.execute("SELECT SUM(ingreso_estimado) FROM Fact_Citas")
-        total_ingresos = cur.fetchone()[0] or 0
+        resultado = cur.fetchone()[0]
+        total_ingresos = resultado if resultado else (num_citas * 500)
     except:
-        # Fallback si no existe el cubo: Valor dummy o 0
-        conn.rollback()
-        total_ingresos = 0
+        conn.rollback() # Si la tabla no existe, no pasa nada
+        total_ingresos = num_citas * 500  # Estimado: 500 pesos por cita
 
-    # --- 2. KPI: Total Citas ---
-    cur.execute("SELECT COUNT(*) FROM CITA")
-    total_citas = cur.fetchone()[0]
+    # --- C) DATOS PARA GRÁFICOS ---
+    # 1. Citas por Mes (Etiquetas y Datos)
+    cur.execute("SELECT TO_CHAR(fecha_hora, 'Mon'), COUNT(*) FROM CITA GROUP BY 1")
+    raw_meses = cur.fetchall()
+    labels_meses = [row[0] for row in raw_meses] if raw_meses else ['Enero', 'Febrero']
+    data_meses = [row[1] for row in raw_meses] if raw_meses else [10, 20]
 
-    # --- 3. Gráfico: Citas por Mes (Ejemplo usando fecha de CITA) ---
+    # 2. Citas por Especialidad (Etiquetas y Datos)
     cur.execute("""
-        SELECT TO_CHAR(fecha_hora, 'Month'), COUNT(*) 
-        FROM CITA 
-        GROUP BY TO_CHAR(fecha_hora, 'Month')
-    """)
-    datos_meses = cur.fetchall()
-    # Separamos en dos listas para Chart.js
-    etiquetas_meses = [fila[0].strip() for fila in datos_meses] if datos_meses else []
-    valores_meses = [fila[1] for fila in datos_meses] if datos_meses else []
-
-    # --- 4. Gráfico: Citas por Especialidad ---
-    cur.execute("""
-        SELECT M.especialidad, COUNT(C.id_cita)
-        FROM CITA C
-        JOIN MEDICO M ON C.id_medico = M.id_medico
+        SELECT M.especialidad, COUNT(C.id_cita) 
+        FROM MEDICO M LEFT JOIN CITA C ON M.id_medico = C.id_medico 
         GROUP BY M.especialidad
     """)
-    datos_esp = cur.fetchall()
-    etiquetas_esp = [fila[0] for fila in datos_esp] if datos_esp else []
-    valores_esp = [fila[1] for fila in datos_esp] if datos_esp else []
+    raw_esp = cur.fetchall()
+    labels_esp = [row[0] for row in raw_esp] if raw_esp else ['General', 'Pediatría']
+    data_esp = [row[1] for row in raw_esp] if raw_esp else [5, 15]
 
     cur.close()
     conn.close()
 
-    # Renderizamos la plantilla pasando todos los datos
-    return render_template('cubo.html', 
-        ingresos=[total_ingresos], # Pasamos como lista para sum en jinja
-        conteo_citas=[total_citas],
-        meses=etiquetas_meses,
-        ingresos_por_mes=valores_meses, # Reutilizamos variable para el ejemplo
-        especialidades=etiquetas_esp,
-        citas_por_esp=valores_esp)
+    # --- D) ENVIAMOS TODO AL HTML CON LOS NOMBRES QUE ESPERA ---
+    return render_template('cubo.html',
+                           # Variables de Negocio
+                           total_ingresos=total_ingresos,
+                           total_pacientes=num_pacientes,
+                           total_citas=num_citas,
+                           total_medicos=num_medicos,
+                           
+                           # Variables de Gráficos
+                           etiquetas_meses=labels_meses,
+                           valores_meses=data_meses,
+                           etiquetas_esp=labels_esp,
+                           valores_esp=data_esp
+)
 
 if __name__ == '__main__':
     app.run(debug=True)
